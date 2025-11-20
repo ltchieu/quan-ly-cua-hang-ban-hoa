@@ -45,6 +45,11 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('/', absolute: false));
+        $target = route('home', absolute: false);
+        if (Auth::check() && Auth::user()->is_admin) {
+            $target = url('/admin/products');
+        }
+
+        return redirect($target);
     }
 }

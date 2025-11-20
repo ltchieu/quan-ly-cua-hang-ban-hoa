@@ -92,7 +92,28 @@
           </a>
         </li>
         @auth
-          <li class="nav-item"><a class="nav-link" href="{{ url('/dashboard') }}"><i class="bi bi-person-circle"></i> Tài khoản</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="accountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-person-circle"></i>
+              <span class="ms-2">Tài khoản</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
+              <li><a class="dropdown-item" href="{{ route('profile.show') }}"><i class="bi bi-person me-2"></i> Hồ sơ</a></li>
+              <li><a class="dropdown-item" href="{{ route('orders.index') }}"><i class="bi bi-clock-history me-2"></i> Lịch sử đơn hàng</a></li>
+              <li><a class="dropdown-item" href="{{ route('vouchers.index') }}"><i class="bi bi-ticket-perforated me-2"></i> Mã giảm giá</a></li>
+              <li><hr class="dropdown-divider"></li>
+              @if(auth()->user() && auth()->user()->is_admin)
+                <li><a class="dropdown-item" href="{{ url('/admin/products') }}"><i class="bi bi-tools me-2"></i> Quản trị</a></li>
+              @endif
+              <li><a class="dropdown-item" href="{{ route('home') }}"><i class="bi bi-house me-2"></i> Trang chủ</a></li>
+              <li>
+                <form method="POST" action="{{ route('logout') }}" class="m-0">
+                  @csrf
+                  <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right me-2"></i> Đăng xuất</button>
+                </form>
+              </li>
+            </ul>
+          </li>
         @else
           <li class="nav-item"><a class="nav-link" href="{{ route('login') }}"><i class="bi bi-box-arrow-in-right"></i> Đăng nhập</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ route('register') }}"><i class="bi bi-person-plus"></i> Đăng ký</a></li>

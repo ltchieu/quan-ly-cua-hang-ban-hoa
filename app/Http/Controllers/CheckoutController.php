@@ -25,39 +25,62 @@ class CheckoutController extends Controller
             'phone'    =>'required|string|max:20',
             'address'  =>'required|string|max:255',
             'note'     =>'nullable|string|max:500',
-            'payment_method'=>'required|in:COD'
+            'payment_method'=>'required|in:cod,momo,vnpay'
         ]);
 
         $cart = session('cart',[]);
         if(empty($cart)) return redirect()->route('cart.index');
 
-        DB::transaction(function () use ($data, $cart) {
-            $total = collect($cart)->sum(fn($i)=>$i['price']*$i['qty']);
+        $total = collect($cart)->sum(fn($i)=>$i['price']*$i['qty']);
 
-            $order = Order::create([
-                'user_id' => auth()->id(),
-                'full_name'=>$data['full_name'],
-                'phone'=>$data['phone'],
-                'address'=>$data['address'],
-                'note'=>$data['note'] ?? null,
-                'payment_method'=>$data['payment_method'],
-                'status'=>'pending',
-                'total'=>$total
-            ]);
-
-            foreach($cart as $pid=>$i){
-                OrderItem::create([
-                    'order_id'=>$order->id,
-                    'product_id'=>$pid,
-                    'price'=>$i['price'],
-                    'quantity'=>$i['qty'],
+        // Handle COD payment directly
+        if ($data['payment_method'] === 'cod') {
+            $order = DB::transaction(function () use ($data, $cart, $total) {
+                $order = Order::create([
+                    'user_id' => auth()->id(),
+                    'full_name'=>$data['full_name'],
+                    'phone'=>$data['phone'],
+                    'address'=>$data['address'],
+                    'note'=>$data['note'] ?? null,
+                    'payment_method'=>$data['payment_method'],
+                    'status'=> 'pending',
+                    'total'=>$total
                 ]);
-                // trừ tồn kho tối giản
-                Product::whereKey($pid)->decrement('stock', $i['qty']);
-            }
-        });
 
-        session()->forget('cart');
-        return redirect()->route('home')->with('success','Đặt hàng thành công!');
+                foreach($cart as $pid=>$i){
+                    OrderItem::create([
+                        'order_id'=>$order->id,
+                        'product_id'=>$pid,
+                        'price'=>$i['price'],
+                        'quantity'=>$i['qty'],
+                    ]);
+                    Product::whereKey($pid)->decrement('stock', $i['qty']);
+                }
+
+                return $order;
+            });
+
+            session()->forget('cart');
+            return redirect()->route('checkout.success', $order->id)
+                ->with('success', 'Đặt hàng thành công! Vui lòng chờ xác nhận từ cửa hàng.');
+        }
+
+        // For online payments, store data in session and redirect to payment gateway
+        $tempOrderId = 'order_' . uniqid();
+        session()->put($tempOrderId, [
+            'order_data' => $data,
+            'cart' => $cart,
+            'total' => $total,
+            'user_id' => auth()->id(),
+        ]);
+
+        if ($data['payment_method'] === 'momo') {
+            return redirect()->route('payment.momo', $tempOrderId);
+        } elseif ($data['payment_method'] === 'vnpay') {
+            return redirect()->route('payment.vnpay', $tempOrderId);
+        }
+
+        // Fallback in case payment method is not handled
+        return redirect()->route('cart.index')->with('error', 'Phương thức thanh toán không hợp lệ.');
     }
 }
