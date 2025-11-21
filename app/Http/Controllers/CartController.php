@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Voucher;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
@@ -14,7 +15,20 @@ class CartController extends Controller
     {
         $cart = $this->cart();
         $total = collect($cart)->sum(fn($i)=> ($i['price']*$i['qty']));
-        return view('cart.index', compact('cart','total'));
+        $appliedVoucher = session()->get('applied_voucher');
+        
+        $discount = 0;
+        $finalTotal = $total;
+        
+        if ($appliedVoucher) {
+            $voucher = Voucher::where('code', $appliedVoucher['code'])->first();
+            if ($voucher) {
+                $discount = $this->calculateDiscount($total, $voucher);
+                $finalTotal = $total - $discount;
+            }
+        }
+        
+        return view('cart.index', compact('cart', 'total', 'discount', 'finalTotal', 'appliedVoucher'));
     }
 
     public function add(Request $request, Product $product)
@@ -54,5 +68,95 @@ class CartController extends Controller
         unset($cart[$product->id]);
         $this->save($cart);
         return back();
+    }
+
+    /**
+     * Apply voucher code to cart
+     */
+    public function applyVoucher(Request $request)
+    {
+        $request->validate([
+            'voucher_code' => 'required|string|max:50'
+        ]);
+
+        $code = strtoupper($request->voucher_code);
+        $cart = $this->cart();
+
+        if (empty($cart)) {
+            return response()->json(['success' => false, 'message' => 'Giỏ hàng trống'], 422);
+        }
+
+        $total = collect($cart)->sum(fn($i) => ($i['price'] * $i['qty']));
+        $voucher = Voucher::where('code', $code)
+            ->where('is_active', true)
+            ->where('expiry_date', '>=', now())
+            ->first();
+
+        if (!$voucher) {
+            return response()->json(['success' => false, 'message' => 'Mã giảm giá không hợp lệ hoặc đã hết hạn'], 422);
+        }
+
+        // Check usage limit
+        if ($voucher->usage_limit && $voucher->used >= $voucher->usage_limit) {
+            return response()->json(['success' => false, 'message' => 'Mã giảm giá đã hết lượt sử dụng'], 422);
+        }
+
+        // Check minimum order value
+        if ($total < $voucher->min_total) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Đơn hàng chưa đạt giá trị tối thiểu: ' . number_format($voucher->min_total, 0, '.', ',') . '₫'
+            ], 422);
+        }
+
+        $discount = $this->calculateDiscount($total, $voucher);
+        $finalTotal = $total - $discount;
+
+        // Store voucher in session
+        session([
+            'applied_voucher' => [
+                'code' => $voucher->code,
+                'type' => $voucher->type,
+                'value' => $voucher->value,
+                'discount' => $discount
+            ]
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Áp dụng mã giảm giá thành công',
+            'discount' => number_format($discount, 0, '.', ','),
+            'final_total' => number_format($finalTotal, 0, '.', ','),
+            'discount_amount' => $discount
+        ]);
+    }
+
+    /**
+     * Remove applied voucher
+     */
+    public function removeVoucher()
+    {
+        session()->forget('applied_voucher');
+        
+        $cart = $this->cart();
+        $total = collect($cart)->sum(fn($i) => ($i['price'] * $i['qty']));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã xóa mã giảm giá',
+            'total' => number_format($total, 0, '.', ',')
+        ]);
+    }
+
+    /**
+     * Calculate discount amount
+     */
+    private function calculateDiscount($total, $voucher)
+    {
+        if ($voucher->type === 'percent') {
+            return ($total * $voucher->value) / 100;
+        } else {
+            return min($voucher->value, $total);
+        }
     }
 }

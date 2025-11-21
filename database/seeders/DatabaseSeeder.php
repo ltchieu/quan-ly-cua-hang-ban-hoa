@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             CategorySeeder::class,
+            VoucherSeeder::class,
         ]);    
         // 2) tạo 80 sản phẩm rải đều
         \App\Models\Product::factory(80)->create();

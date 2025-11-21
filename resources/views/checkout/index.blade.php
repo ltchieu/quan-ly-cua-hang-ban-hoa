@@ -109,6 +109,16 @@
           <span>Tạm tính:</span>
           <span>{{ number_format($total, 0, '.', ',') }} ₫</span>
         </div>
+        @php
+          $discount = session()->get('applied_voucher.discount', 0);
+          $finalTotal = $total - $discount;
+        @endphp
+        @if($discount > 0)
+          <div class="d-flex justify-content-between mb-2 text-danger">
+            <span>Giảm giá:</span>
+            <span>-{{ number_format($discount, 0, '.', ',') }} ₫</span>
+          </div>
+        @endif
         <div class="d-flex justify-content-between mb-2">
           <span>Phí giao hàng:</span>
           <span>Miễn phí</span>
@@ -117,7 +127,7 @@
         <div class="d-flex justify-content-between">
           <strong>Tổng cộng:</strong>
           <strong style="color: #ff7a00; font-size: 1.2rem;">
-            {{ number_format($total, 0, '.', ',') }} ₫
+            {{ number_format($finalTotal, 0, '.', ',') }} ₫
           </strong>
         </div>
       </div>
