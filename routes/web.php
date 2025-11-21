@@ -77,8 +77,38 @@ Route::middleware('auth')->group(function () {
 });
 
 // Khu vực Admin (đã tạo middleware alias 'admin')
-Route::prefix('admin')->middleware(['auth','admin'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth','admin'])->group(function () {
+    // Dashboard
+    Route::get('/', function () {
+        return redirect()->route('admin.orders.index');
+    })->name('dashboard');
+    
+    // Products
     Route::resource('products', \App\Http\Controllers\Admin\ProductController::class);
+    
+    // Orders
+    Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class)
+        ->except(['create', 'store']);
+    
+    // Categories
+    Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
+    
+    // Staff Management
+    Route::resource('staff', \App\Http\Controllers\Admin\StaffController::class);
+    
+    // Customer Management
+    Route::resource('customers', \App\Http\Controllers\Admin\CustomerController::class)
+        ->only(['index', 'show', 'destroy']);
+    
+    // Banners
+    Route::resource('banners', \App\Http\Controllers\Admin\BannerController::class);
+    
+    // News
+    Route::resource('news', \App\Http\Controllers\Admin\NewsController::class);
+    
+    // Reports
+    Route::get('reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])
+        ->name('reports.index');
 });
 
 // Route đăng nhập/đăng ký của Breeze
