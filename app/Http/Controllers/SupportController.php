@@ -16,13 +16,13 @@ class SupportController extends Controller
             [
                 'id' => 1,
                 'question' => 'Làm thế nào để đặt hàng?',
-                'answer' => 'Để đặt hàng, hãy: 1) Duyệt các sản phẩm và chọn hoa bạn muốn, 2) Thêm vào giỏ hàng, 3) Tiến hành thanh toán, 4) Nhập địa chỉ giao hàng, 5) Chọn phương thức thanh toán (Momo, VNPay hoặc COD), 6) Hoàn thành đơn hàng. Bạn sẽ nhận được xác nhận qua email.',
+                'answer' => "Để đặt hàng, hãy:\n1) Duyệt các sản phẩm và chọn hoa bạn muốn,\n2) Thêm vào giỏ hàng,\n3) Tiến hành thanh toán,\n4) Nhập địa chỉ giao hàng,\n5) Chọn phương thức thanh toán (Momo, VNPay hoặc COD),\n6) Hoàn thành đơn hàng.\nBạn sẽ nhận được xác nhận qua email.",
                 'category' => 'order'
             ],
             [
                 'id' => 2,
                 'question' => 'Các phương thức thanh toán nào được hỗ trợ?',
-                'answer' => 'Chúng tôi hỗ trợ các phương thức thanh toán sau: 1) Ví điện tử MoMo (QR Code), 2) Cổng thanh toán VNPay, 3) Thanh toán khi nhận hàng (COD). Tất cả phương thức đều an toàn và bảo mật.',
+                'answer' => "Chúng tôi hỗ trợ các phương thức thanh toán sau:\n1) Ví điện tử MoMo (QR Code),\n2) Cổng thanh toán VNPay,\n3) Thanh toán khi nhận hàng (COD).\nTất cả phương thức đều an toàn và bảo mật.",
                 'category' => 'payment'
             ],
             [
@@ -85,17 +85,17 @@ class SupportController extends Controller
             'message' => 'required|string|min:10|max:2000',
         ]);
 
-        $ticket = new SupportTicket();
-        $ticket->user_id = auth()->id();
-        $ticket->subject = $validated['subject'];
-        $ticket->category = $validated['category'];
-        $ticket->message = $validated['message'];
-        $ticket->status = 'open';
-        $ticket->save();
+        // Generate ticket number before creating
+        $ticketNumber = 'TK' . date('YmdHis') . rand(1000, 9999);
 
-        // Generate ticket number
-        $ticket->ticket_number = $ticket->generateTicketNumber();
-        $ticket->save();
+        $ticket = SupportTicket::create([
+            'user_id' => auth()->id(),
+            'subject' => $validated['subject'],
+            'category' => $validated['category'],
+            'message' => $validated['message'],
+            'status' => 'open',
+            'ticket_number' => $ticketNumber,
+        ]);
 
         return redirect()->route('support.tickets')->with('success', 'Yêu cầu của bạn đã được gửi thành công. Mã yêu cầu: ' . $ticket->ticket_number);
     }

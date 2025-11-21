@@ -1,150 +1,175 @@
 @extends('layouts.app')
+@section('title','Chi tiết yêu cầu hỗ trợ')
 
 @section('content')
-<div class="min-h-screen bg-gray-50">
+<div class="py-5">
+  <div class="container">
     <!-- Header -->
-    <div class="bg-white border-b">
-        <div class="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-            <div class="flex items-center gap-4 mb-4">
-                <a href="{{ route('support.tickets') }}" class="text-pink-600 hover:text-pink-700 transition">
-                    <i class="fas fa-arrow-left mr-2"></i>Quay lại
-                </a>
-            </div>
-            <h1 class="text-3xl font-bold text-gray-900">{{ $ticket->subject }}</h1>
-            <p class="mt-2 text-gray-600">Mã yêu cầu: <span class="font-mono font-semibold">{{ $ticket->ticket_number }}</span></p>
-        </div>
+    <div class="mb-5">
+      <a href="{{ route('support.tickets') }}" class="btn btn-link p-0" style="color:#ff7a00;">
+        <i class="bi bi-arrow-left me-2"></i>Quay lại
+      </a>
+      <h1 class="display-5 fw-bold mt-3 mb-2">{{ $ticket->subject }}</h1>
+      <p class="text-muted">Mã yêu cầu: <code class="fw-semibold">{{ $ticket->ticket_number }}</code></p>
     </div>
 
-    <div class="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-        <!-- Status & Info -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <!-- Status Badge -->
-            <div class="bg-white rounded-lg shadow p-6 text-center">
-                <p class="text-gray-600 text-sm mb-2">Trạng thái</p>
-                <div class="text-2xl font-bold
-                    @if($ticket->status === 'open') text-red-600
-                    @elseif($ticket->status === 'in_progress') text-yellow-600
-                    @elseif($ticket->status === 'resolved') text-green-600
-                    @else text-gray-600
-                    @endif
-                ">
-                    @if($ticket->status === 'open')
-                        <i class="fas fa-clock mr-2"></i>Mở
-                    @elseif($ticket->status === 'in_progress')
-                        <i class="fas fa-spinner mr-2"></i>Đang xử lý
-                    @elseif($ticket->status === 'resolved')
-                        <i class="fas fa-check-circle mr-2"></i>Đã giải quyết
-                    @else
-                        <i class="fas fa-times-circle mr-2"></i>Đã đóng
-                    @endif
-                </div>
+    <!-- Status & Info Cards -->
+    <div class="row g-3 mb-5">
+      <!-- Status -->
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center h-100">
+          <div class="card-body">
+            <small class="text-muted d-block mb-2">Trạng thái</small>
+            <div class="fw-bold" style="font-size:1.25rem;
+              @if($ticket->status === 'open') color:#dc3545;
+              @elseif($ticket->status === 'in_progress') color:#ffc107;
+              @elseif($ticket->status === 'resolved') color:#198754;
+              @else color:#6c757d;
+              @endif
+            ">
+              @if($ticket->status === 'open')
+                <i class="bi bi-clock me-1"></i>Mở
+              @elseif($ticket->status === 'in_progress')
+                <i class="bi bi-hourglass-split me-1"></i>Đang xử lý
+              @elseif($ticket->status === 'resolved')
+                <i class="bi bi-check-circle me-1"></i>Đã giải quyết
+              @else
+                <i class="bi bi-x-circle me-1"></i>Đã đóng
+              @endif
             </div>
-
-            <!-- Category -->
-            <div class="bg-white rounded-lg shadow p-6 text-center">
-                <p class="text-gray-600 text-sm mb-2">Danh mục</p>
-                <p class="text-lg font-semibold text-gray-900">
-                    @if($ticket->category === 'order')
-                        <i class="fas fa-shopping-cart mr-1"></i>Đơn hàng
-                    @elseif($ticket->category === 'payment')
-                        <i class="fas fa-credit-card mr-1"></i>Thanh toán
-                    @elseif($ticket->category === 'shipping')
-                        <i class="fas fa-truck mr-1"></i>Giao hàng
-                    @elseif($ticket->category === 'return')
-                        <i class="fas fa-redo mr-1"></i>Đổi trả
-                    @elseif($ticket->category === 'product')
-                        <i class="fas fa-flower mr-1"></i>Sản phẩm
-                    @else
-                        <i class="fas fa-question-circle mr-1"></i>Khác
-                    @endif
-                </p>
-            </div>
-
-            <!-- Created Date -->
-            <div class="bg-white rounded-lg shadow p-6 text-center">
-                <p class="text-gray-600 text-sm mb-2">Gửi lúc</p>
-                <p class="text-lg font-semibold text-gray-900">{{ $ticket->created_at->format('d/m/Y') }}</p>
-                <p class="text-sm text-gray-600">{{ $ticket->created_at->format('H:i') }}</p>
-            </div>
-
-            <!-- Response Date -->
-            <div class="bg-white rounded-lg shadow p-6 text-center">
-                <p class="text-gray-600 text-sm mb-2">Phản hồi lúc</p>
-                @if($ticket->responded_at)
-                <p class="text-lg font-semibold text-green-600">{{ $ticket->responded_at->format('d/m/Y') }}</p>
-                <p class="text-sm text-gray-600">{{ $ticket->responded_at->format('H:i') }}</p>
-                @else
-                <p class="text-lg font-semibold text-gray-400">Chưa phản hồi</p>
-                @endif
-            </div>
+          </div>
         </div>
+      </div>
 
-        <!-- Messages -->
-        <div class="bg-white rounded-lg shadow divide-y">
-            <!-- User Message -->
-            <div class="p-8">
-                <div class="flex items-start gap-4">
-                    <div class="flex-shrink-0">
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode($ticket->user->name) }}&background=random" alt="{{ $ticket->user->name }}" class="w-12 h-12 rounded-full">
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between mb-2">
-                            <h3 class="text-lg font-semibold text-gray-900">{{ $ticket->user->name }}</h3>
-                            <span class="text-sm text-gray-500">{{ $ticket->created_at->diffForHumans() }}</span>
-                        </div>
-                        <p class="text-sm text-gray-600 mb-3">Yêu cầu hỗ trợ</p>
-                        <div class="bg-gray-50 rounded-lg p-4 border-l-4 border-pink-600">
-                            <p class="text-gray-800 whitespace-pre-wrap">{{ $ticket->message }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- Category -->
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center h-100">
+          <div class="card-body">
+            <small class="text-muted d-block mb-2">Danh mục</small>
+            <p class="fw-bold mb-0">
+              @if($ticket->category === 'order')
+                <i class="bi bi-cart me-1"></i>Đơn hàng
+              @elseif($ticket->category === 'payment')
+                <i class="bi bi-credit-card me-1"></i>Thanh toán
+              @elseif($ticket->category === 'shipping')
+                <i class="bi bi-truck me-1"></i>Giao hàng
+              @elseif($ticket->category === 'return')
+                <i class="bi bi-arrow-repeat me-1"></i>Đổi trả
+              @elseif($ticket->category === 'product')
+                <i class="bi bi-flower1 me-1"></i>Sản phẩm
+              @else
+                <i class="bi bi-question-circle me-1"></i>Khác
+              @endif
+            </p>
+          </div>
+        </div>
+      </div>
 
-            <!-- Admin Response -->
-            @if($ticket->admin_response)
-            <div class="p-8 bg-blue-50">
-                <div class="flex items-start gap-4">
-                    <div class="flex-shrink-0">
-                        <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
-                            <i class="fas fa-headset"></i>
-                        </div>
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between mb-2">
-                            <h3 class="text-lg font-semibold text-gray-900">Đội hỗ trợ khách hàng</h3>
-                            <span class="text-sm text-gray-600">{{ $ticket->responded_at->diffForHumans() }}</span>
-                        </div>
-                        <p class="text-sm text-gray-600 mb-3">Phản hồi chính thức</p>
-                        <div class="bg-white rounded-lg p-4 border-l-4 border-blue-600">
-                            <p class="text-gray-800 whitespace-pre-wrap">{{ $ticket->admin_response }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- Created Date -->
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center h-100">
+          <div class="card-body">
+            <small class="text-muted d-block mb-2">Gửi lúc</small>
+            <p class="fw-bold mb-1">{{ $ticket->created_at->format('d/m/Y') }}</p>
+            <small class="text-muted">{{ $ticket->created_at->format('H:i') }}</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Response Date -->
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center h-100">
+          <div class="card-body">
+            <small class="text-muted d-block mb-2">Phản hồi lúc</small>
+            @if($ticket->responded_at)
+              <p class="fw-bold mb-1 text-success">{{ $ticket->responded_at->format('d/m/Y') }}</p>
+              <small class="text-muted">{{ $ticket->responded_at->format('H:i') }}</small>
             @else
-            <div class="p-8 text-center">
-                <i class="fas fa-clock text-4xl text-gray-300 mb-4"></i>
-                <p class="text-gray-600 mb-4">Chúng tôi đang xử lý yêu cầu của bạn. Vui lòng đợi trong ít phút.</p>
-                <p class="text-sm text-gray-500">Thường phản hồi trong 24 giờ</p>
-            </div>
+              <p class="fw-bold mb-0 text-secondary">Chưa phản hồi</p>
             @endif
+          </div>
         </div>
-
-        <!-- Actions -->
-        <div class="mt-8 bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Bạn cần giúp gì thêm không?</h3>
-            <div class="flex gap-4">
-                <a href="{{ route('support.contact') }}" class="flex-1 bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 rounded-lg transition text-center">
-                    <i class="fas fa-plus mr-2"></i>Gửi yêu cầu mới
-                </a>
-                <a href="{{ route('support.faq') }}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 rounded-lg transition text-center">
-                    <i class="fas fa-question-circle mr-2"></i>Xem câu hỏi thường gặp
-                </a>
-                <a href="{{ route('support.tickets') }}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 rounded-lg transition text-center">
-                    <i class="fas fa-list mr-2"></i>Xem tất cả yêu cầu
-                </a>
-            </div>
-        </div>
+      </div>
     </div>
+
+    <!-- Messages -->
+    <div class="card border-0 shadow-sm mb-5">
+      <!-- User Message -->
+      <div class="card-body p-4">
+        <div class="d-flex gap-3 mb-4">
+          <img src="https://ui-avatars.com/api/?name={{ urlencode($ticket->user->name) }}&background=random" alt="{{ $ticket->user->name }}" class="rounded-circle" style="width:48px;height:48px;">
+          <div class="flex-grow-1">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="fw-bold mb-0">{{ $ticket->user->name }}</h5>
+              <small class="text-muted">{{ $ticket->created_at->diffForHumans() }}</small>
+            </div>
+            <small class="text-muted d-block mb-2">Yêu cầu hỗ trợ</small>
+            <div class="bg-light p-3 rounded border-start border-danger" style="border-width:4px !important;">
+              <p class="mb-0 text-dark" style="white-space:pre-wrap;">{{ $ticket->message }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Response -->
+      @if($ticket->admin_response)
+      <div class="card-body p-4 border-top bg-light">
+        <div class="d-flex gap-3">
+          <div style="width:48px;height:48px;" class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center flex-shrink-0">
+            <i class="bi bi-headset fw-bold"></i>
+          </div>
+          <div class="flex-grow-1">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="fw-bold mb-0">Đội hỗ trợ khách hàng</h5>
+              <small class="text-muted">{{ $ticket->responded_at->diffForHumans() }}</small>
+            </div>
+            <small class="text-muted d-block mb-2">Phản hồi chính thức</small>
+            <div class="bg-white p-3 rounded border-start border-info" style="border-width:4px !important;">
+              <p class="mb-0 text-dark" style="white-space:pre-wrap;">{{ $ticket->admin_response }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      @else
+      <div class="card-body p-5 text-center border-top">
+        <i class="bi bi-clock" style="font-size:3rem;color:#ccc;"></i>
+        <p class="text-muted mt-3 mb-2">Chúng tôi đang xử lý yêu cầu của bạn. Vui lòng đợi trong ít phút.</p>
+        <small class="text-muted">Thường phản hồi trong 24 giờ</small>
+      </div>
+      @endif
+    </div>
+
+    <!-- Actions -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title fw-bold mb-4">Bạn cần giúp gì thêm không?</h5>
+        <div class="row g-2">
+          <div class="col-md-4">
+            <a href="{{ route('support.contact') }}" class="btn btn-brand w-100">
+              <i class="bi bi-plus-lg me-2"></i>Gửi yêu cầu mới
+            </a>
+          </div>
+          <div class="col-md-4">
+            <a href="{{ route('support.faq') }}" class="btn btn-outline-secondary w-100" style="color:#ff7a00;border-color:#ff7a00;">
+              <i class="bi bi-question-circle me-2"></i>Xem FAQ
+            </a>
+          </div>
+          <div class="col-md-4">
+            <a href="{{ route('support.tickets') }}" class="btn btn-outline-secondary w-100" style="color:#ff7a00;border-color:#ff7a00;">
+              <i class="bi bi-list me-2"></i>Tất cả yêu cầu
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<style>
+  .btn-outline-secondary:hover {
+    background-color: #ff7a00 !important;
+    border-color: #ff7a00 !important;
+    color: #fff !important;
+  }
+</style>
 @endsection

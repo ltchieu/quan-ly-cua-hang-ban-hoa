@@ -1,189 +1,244 @@
 @extends('layouts.app')
+@section('title','Liên hệ chúng tôi')
 
 @section('content')
-<div class="min-h-screen bg-gray-50">
+<div class="py-5">
+  <div class="container">
     <!-- Header -->
-    <div class="bg-white border-b">
-        <div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-bold text-gray-900">Liên hệ chúng tôi</h1>
-            <p class="mt-2 text-gray-600">Gửi yêu cầu hỗ trợ của bạn đến đội ngũ khách hàng của chúng tôi</p>
-        </div>
+    <div class="row mb-5">
+      <div class="col-12">
+        <h1 class="display-5 fw-bold mb-2">Liên hệ chúng tôi</h1>
+        <p class="lead text-muted">Gửi yêu cầu hỗ trợ của bạn đến đội ngũ khách hàng của chúng tôi</p>
+      </div>
     </div>
 
-    <div class="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Contact Information -->
-            <div class="lg:col-span-1">
-                <div class="space-y-6">
-                    <!-- Email -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-envelope text-pink-600 text-2xl"></i>
-                            </div>
-                            <div class="ml-4">
-                                <h3 class="text-lg font-semibold text-gray-900">Email</h3>
-                                <p class="mt-2 text-gray-600">support@flowershop.com</p>
-                                <p class="text-sm text-gray-500 mt-1">Phản hồi trong 24 giờ</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Phone -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-phone text-pink-600 text-2xl"></i>
-                            </div>
-                            <div class="ml-4">
-                                <h3 class="text-lg font-semibold text-gray-900">Điện thoại</h3>
-                                <p class="mt-2 text-gray-600">1900 1234</p>
-                                <p class="text-sm text-gray-500 mt-1">Thứ 2 - Chủ nhật, 8:00 - 22:00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Address -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-map-marker-alt text-pink-600 text-2xl"></i>
-                            </div>
-                            <div class="ml-4">
-                                <h3 class="text-lg font-semibold text-gray-900">Địa chỉ</h3>
-                                <p class="mt-2 text-gray-600">123 Đường Hoa<br/>Quận 1, TP.HCM</p>
-                                <p class="text-sm text-gray-500 mt-1">Thứ 2 - Chủ nhật, 9:00 - 18:00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Links -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Liên kết nhanh</h3>
-                        <div class="space-y-2">
-                            <a href="{{ route('support.faq') }}" class="flex items-center text-pink-600 hover:text-pink-700 transition">
-                                <i class="fas fa-question-circle mr-2"></i>Xem câu hỏi thường gặp
-                            </a>
-                            <a href="{{ route('support.tickets') }}" class="flex items-center text-pink-600 hover:text-pink-700 transition">
-                                <i class="fas fa-ticket-alt mr-2"></i>Xem yêu cầu của tôi
-                            </a>
-                        </div>
-                    </div>
-                </div>
+    <!-- Contact Content -->
+    <div class="row">
+      <!-- Contact Information Sidebar -->
+      <div class="col-lg-4 mb-5 mb-lg-0">
+        <!-- Email -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+            <div class="d-flex align-items-start">
+              <div class="flex-shrink-0">
+                <i class="bi bi-envelope" style="font-size:1.5rem;color:#ff7a00;"></i>
+              </div>
+              <div class="ms-3">
+                <h5 class="card-title fw-bold">Email</h5>
+                <p class="card-text">support@flowershop.com</p>
+                <p class="small text-muted">Phản hồi trong 24 giờ</p>
+              </div>
             </div>
-
-            <!-- Contact Form -->
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-lg shadow p-8">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Gửi yêu cầu hỗ trợ</h2>
-
-                    @if ($errors->any())
-                    <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <h3 class="font-semibold text-red-800 mb-2">Vui lòng kiểm tra lại thông tin:</h3>
-                        <ul class="list-disc list-inside text-red-700 text-sm space-y-1">
-                            @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                    @endif
-
-                    <form action="{{ route('support.store') }}" method="POST" class="space-y-6">
-                        @csrf
-
-                        <!-- Subject -->
-                        <div>
-                            <label for="subject" class="block text-sm font-medium text-gray-900">Tiêu đề <span class="text-red-600">*</span></label>
-                            <input 
-                                type="text" 
-                                id="subject" 
-                                name="subject" 
-                                placeholder="Nhập tiêu đề yêu cầu"
-                                value="{{ old('subject') }}"
-                                class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600 focus:border-transparent @error('subject') border-red-500 @enderror"
-                            >
-                        </div>
-
-                        <!-- Category -->
-                        <div>
-                            <label for="category" class="block text-sm font-medium text-gray-900">Danh mục <span class="text-red-600">*</span></label>
-                            <select 
-                                id="category" 
-                                name="category"
-                                class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600 focus:border-transparent @error('category') border-red-500 @enderror"
-                            >
-                                <option value="">-- Chọn danh mục --</option>
-                                <option value="order" {{ old('category') === 'order' ? 'selected' : '' }}>
-                                    <i class="fas fa-shopping-cart"></i> Đơn hàng
-                                </option>
-                                <option value="product" {{ old('category') === 'product' ? 'selected' : '' }}>
-                                    <i class="fas fa-flower"></i> Sản phẩm
-                                </option>
-                                <option value="payment" {{ old('category') === 'payment' ? 'selected' : '' }}>
-                                    <i class="fas fa-credit-card"></i> Thanh toán
-                                </option>
-                                <option value="shipping" {{ old('category') === 'shipping' ? 'selected' : '' }}>
-                                    <i class="fas fa-truck"></i> Giao hàng
-                                </option>
-                                <option value="return" {{ old('category') === 'return' ? 'selected' : '' }}>
-                                    <i class="fas fa-redo"></i> Đổi trả
-                                </option>
-                                <option value="other" {{ old('category') === 'other' ? 'selected' : '' }}>
-                                    <i class="fas fa-question-circle"></i> Khác
-                                </option>
-                            </select>
-                        </div>
-
-                        <!-- Message -->
-                        <div>
-                            <label for="message" class="block text-sm font-medium text-gray-900">Chi tiết vấn đề <span class="text-red-600">*</span></label>
-                            <textarea 
-                                id="message" 
-                                name="message" 
-                                rows="8"
-                                placeholder="Mô tả chi tiết vấn đề của bạn (tối thiểu 10 ký tự)..."
-                                class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-600 focus:border-transparent resize-none @error('message') border-red-500 @enderror"
-                            >{{ old('message') }}</textarea>
-                            <p class="mt-2 text-sm text-gray-500">
-                                <span class="char-count">0</span>/2000 ký tự
-                            </p>
-                        </div>
-
-                        <!-- Submit Button -->
-                        <div class="flex gap-4">
-                            <button 
-                                type="submit" 
-                                class="flex-1 bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 rounded-lg transition"
-                            >
-                                <i class="fas fa-paper-plane mr-2"></i>Gửi yêu cầu
-                            </button>
-                            <button 
-                                type="reset" 
-                                class="px-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 rounded-lg transition"
-                            >
-                                <i class="fas fa-redo mr-2"></i>Xóa
-                            </button>
-                        </div>
-
-                        <!-- Info -->
-                        <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-                            <i class="fas fa-info-circle mr-2"></i>
-                            Chúng tôi sẽ phản hồi yêu cầu của bạn trong 24 giờ. Vui lòng kiểm tra email để cập nhật.
-                        </div>
-                    </form>
-                </div>
-            </div>
+          </div>
         </div>
+
+        <!-- Phone -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+            <div class="d-flex align-items-start">
+              <div class="flex-shrink-0">
+                <i class="bi bi-telephone" style="font-size:1.5rem;color:#ff7a00;"></i>
+              </div>
+              <div class="ms-3">
+                <h5 class="card-title fw-bold">Điện thoại</h5>
+                <p class="card-text">1900 1234</p>
+                <p class="small text-muted">Thứ 2 - Chủ nhật, 8:00 - 22:00</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Address -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+            <div class="d-flex align-items-start">
+              <div class="flex-shrink-0">
+                <i class="bi bi-geo-alt" style="font-size:1.5rem;color:#ff7a00;"></i>
+              </div>
+              <div class="ms-3">
+                <h5 class="card-title fw-bold">Địa chỉ</h5>
+                <p class="card-text">123 Đường Hoa<br/>Quận 1, TP.HCM</p>
+                <p class="small text-muted">Thứ 2 - Chủ nhật, 9:00 - 18:00</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title fw-bold mb-3">Liên kết nhanh</h5>
+            <div class="d-flex flex-column gap-2">
+              <a href="{{ route('support.faq') }}" class="text-decoration-none" style="color:#ff7a00;">
+                <i class="bi bi-question-circle me-2"></i>Xem câu hỏi thường gặp
+              </a>
+              <a href="{{ route('support.tickets') }}" class="text-decoration-none" style="color:#ff7a00;">
+                <i class="bi bi-ticket-detailed me-2"></i>Xem yêu cầu của tôi
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Form -->
+      <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4 p-md-5">
+            <h2 class="card-title display-6 fw-bold mb-4">Gửi yêu cầu hỗ trợ</h2>
+
+            @if ($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+              <strong><i class="bi bi-exclamation-circle me-2"></i>Vui lòng kiểm tra lại thông tin:</strong>
+              <ul class="list-unstyled mb-0 mt-2">
+                @foreach ($errors->all() as $error)
+                <li class="small">{{ $error }}</li>
+                @endforeach
+              </ul>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            @endif
+
+            <form action="{{ route('support.store') }}" method="POST" class="needs-validation" novalidate>
+              @csrf
+
+              <!-- Subject -->
+              <div class="mb-3">
+                <label for="subject" class="form-label fw-semibold">Tiêu đề <span class="text-danger">*</span></label>
+                <input 
+                  type="text" 
+                  class="form-control @error('subject') is-invalid @enderror" 
+                  id="subject" 
+                  name="subject" 
+                  placeholder="Nhập tiêu đề yêu cầu"
+                  value="{{ old('subject') }}"
+                  required>
+                @error('subject')
+                <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+              </div>
+
+              <!-- Category -->
+              <div class="mb-3">
+                <label for="category" class="form-label fw-semibold">Danh mục <span class="text-danger">*</span></label>
+                <select 
+                  class="form-select @error('category') is-invalid @enderror" 
+                  id="category" 
+                  name="category"
+                  required>
+                  <option value="">-- Chọn danh mục --</option>
+                  <option value="order" {{ old('category') === 'order' ? 'selected' : '' }}>
+                    <i class="bi bi-cart"></i> Đơn hàng
+                  </option>
+                  <option value="product" {{ old('category') === 'product' ? 'selected' : '' }}>
+                    <i class="bi bi-flower1"></i> Sản phẩm
+                  </option>
+                  <option value="payment" {{ old('category') === 'payment' ? 'selected' : '' }}>
+                    <i class="bi bi-credit-card"></i> Thanh toán
+                  </option>
+                  <option value="shipping" {{ old('category') === 'shipping' ? 'selected' : '' }}>
+                    <i class="bi bi-truck"></i> Giao hàng
+                  </option>
+                  <option value="return" {{ old('category') === 'return' ? 'selected' : '' }}>
+                    <i class="bi bi-arrow-repeat"></i> Đổi trả
+                  </option>
+                  <option value="other" {{ old('category') === 'other' ? 'selected' : '' }}>
+                    <i class="bi bi-question-circle"></i> Khác
+                  </option>
+                </select>
+                @error('category')
+                <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+              </div>
+
+              <!-- Message -->
+              <div class="mb-3">
+                <label for="message" class="form-label fw-semibold">Chi tiết vấn đề <span class="text-danger">*</span></label>
+                <textarea 
+                  class="form-control @error('message') is-invalid @enderror" 
+                  id="message" 
+                  name="message" 
+                  rows="8"
+                  placeholder="Mô tả chi tiết vấn đề của bạn (tối thiểu 10 ký tự)..."
+                  minlength="10"
+                  maxlength="2000"
+                  required>{{ old('message') }}</textarea>
+                <small class="d-block mt-2 text-muted">
+                  <span class="char-count">0</span>/2000 ký tự
+                </small>
+                @error('message')
+                <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+              </div>
+
+              <!-- Submit Buttons -->
+              <div class="d-flex gap-3 mb-3">
+                <button 
+                  type="submit" 
+                  class="btn btn-brand btn-lg flex-grow-1">
+                  <i class="bi bi-send me-2"></i>Gửi yêu cầu
+                </button>
+                <button 
+                  type="reset" 
+                  class="btn btn-outline-secondary btn-lg">
+                  <i class="bi bi-arrow-counterclockwise me-2"></i>Xóa
+                </button>
+              </div>
+
+              <!-- Info Alert -->
+              <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Lưu ý:</strong> Chúng tôi sẽ phản hồi yêu cầu của bạn trong 24 giờ. Vui lòng kiểm tra email để cập nhật.
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 
+<style>
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #ff7a00;
+    box-shadow: 0 0 0 0.2rem rgba(255, 122, 0, 0.25);
+  }
+  .btn-brand {
+    background: var(--brand);
+    border: 0;
+    color: #fff;
+  }
+  .btn-brand:hover {
+    background: var(--brand-2);
+    color: #fff;
+  }
+</style>
+
 <script>
-    // Character counter
-    const messageField = document.getElementById('message');
-    const charCount = document.querySelector('.char-count');
-    
-    messageField.addEventListener('input', function() {
-        charCount.textContent = this.value.length;
-    });
+  // Character counter
+  const messageField = document.getElementById('message');
+  const charCount = document.querySelector('.char-count');
+  
+  messageField.addEventListener('input', function() {
+    charCount.textContent = this.value.length;
+  });
+
+  // Bootstrap form validation
+  (function() {
+    'use strict';
+    window.addEventListener('load', function() {
+      const forms = document.querySelectorAll('.needs-validation');
+      Array.prototype.slice.call(forms).forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+          if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          form.classList.add('was-validated');
+        }, false);
+      });
+    }, false);
+  })();
 </script>
+
 @endsection

@@ -1,128 +1,150 @@
 @extends('layouts.app')
+@section('title','Câu hỏi thường gặp')
 
 @section('content')
-<div class="min-h-screen bg-gray-50">
+<div class="py-5">
+  <div class="container">
     <!-- Header -->
-    <div class="bg-white border-b">
-        <div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-bold text-gray-900">Trung tâm Trợ giúp</h1>
-            <p class="mt-2 text-gray-600">Tìm câu trả lời cho các câu hỏi thường gặp</p>
+    <div class="row mb-5">
+      <div class="col-lg-8 mx-auto">
+        <div class="text-center mb-4">
+          <h1 class="display-5 fw-bold mb-2">Câu Hỏi Thường Gặp</h1>
+          <p class="lead text-muted">
+            Tìm hiểu thêm thông tin về dịch vụ của chúng tôi.
+            <a href="{{ route('support.contact') }}" class="text-decoration-none fw-semibold">Liên hệ với chúng tôi</a>
+          </p>
         </div>
+      </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <!-- Sidebar - Categories -->
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-lg shadow sticky top-4">
-                    <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Danh mục</h3>
-                        <div class="space-y-2">
-                            <button onclick="filterFAQ('all')" class="w-full text-left px-4 py-2 rounded text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition filter-btn active" data-filter="all">
-                                <i class="fas fa-list mr-2"></i>Tất cả câu hỏi
-                            </button>
-                            <button onclick="filterFAQ('order')" class="w-full text-left px-4 py-2 rounded text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition filter-btn" data-filter="order">
-                                <i class="fas fa-shopping-cart mr-2"></i>Đơn hàng
-                            </button>
-                            <button onclick="filterFAQ('payment')" class="w-full text-left px-4 py-2 rounded text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition filter-btn" data-filter="payment">
-                                <i class="fas fa-credit-card mr-2"></i>Thanh toán
-                            </button>
-                            <button onclick="filterFAQ('shipping')" class="w-full text-left px-4 py-2 rounded text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition filter-btn" data-filter="shipping">
-                                <i class="fas fa-truck mr-2"></i>Giao hàng
-                            </button>
-                            <button onclick="filterFAQ('return')" class="w-full text-left px-4 py-2 rounded text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition filter-btn" data-filter="return">
-                                <i class="fas fa-redo mr-2"></i>Đổi trả
-                            </button>
-                            <button onclick="filterFAQ('product')" class="w-full text-left px-4 py-2 rounded text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition filter-btn" data-filter="product">
-                                <i class="fas fa-flower mr-2"></i>Sản phẩm
-                            </button>
-                            <button onclick="filterFAQ('other')" class="w-full text-left px-4 py-2 rounded text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition filter-btn" data-filter="other">
-                                <i class="fas fa-question-circle mr-2"></i>Khác
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Contact Support Button -->
-                <div class="mt-6 bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Không tìm thấy câu trả lời?</h3>
-                    <a href="{{ route('support.contact') }}" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 rounded-lg transition">
-                        <i class="fas fa-envelope mr-2"></i>Liên hệ chúng tôi
-                    </a>
-                </div>
-            </div>
-
-            <!-- Main Content - FAQ -->
-            <div class="lg:col-span-3">
-                <div class="bg-white rounded-lg shadow">
-                    <div class="divide-y">
-                        @foreach($faqs as $faq)
-                        <div class="faq-item p-6 border-l-4 border-transparent hover:border-pink-600 transition" data-category="{{ $faq['category'] }}">
-                            <details class="group cursor-pointer">
-                                <summary class="flex items-center justify-between font-semibold text-gray-900 hover:text-pink-600 transition">
-                                    <div class="flex items-start gap-3">
-                                        <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-pink-100 text-pink-600 text-sm font-semibold flex-shrink-0">
-                                            <i class="fas fa-plus"></i>
-                                        </span>
-                                        <span>{{ $faq['question'] }}</span>
-                                    </div>
-                                </summary>
-                                <div class="mt-4 ml-9 text-gray-700 leading-relaxed">
-                                    {!! nl2br(e($faq['answer'])) !!}
-                                </div>
-                            </details>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
+    <!-- FAQ Content -->
+    <div class="row">
+      <div class="col-lg-8 mx-auto">
+        <!-- Category Tabs -->
+        <div class="mb-4" id="categoryFilter">
+          <ul class="nav nav-pills gap-2 flex-wrap" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="btn btn-sm btn-outline-secondary active category-btn" type="button" data-category="all" role="tab">
+                <i class="bi bi-check-circle me-2"></i>Tất cả
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="btn btn-sm btn-outline-secondary category-btn" type="button" data-category="order" role="tab">
+                <i class="bi bi-box me-2"></i>Đơn hàng
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="btn btn-sm btn-outline-secondary category-btn" type="button" data-category="product" role="tab">
+                <i class="bi bi-flower1 me-2"></i>Sản phẩm
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="btn btn-sm btn-outline-secondary category-btn" type="button" data-category="payment" role="tab">
+                <i class="bi bi-credit-card me-2"></i>Thanh toán
+              </button>
+            </li>
+          </ul>
         </div>
+
+        <!-- Accordion FAQ -->
+        <div class="accordion" id="faqAccordion">
+          @foreach($faqs as $index => $faq)
+          <div class="accordion-item border-0 mb-3 rounded shadow-sm faq-item" data-category="{{ $faq['category'] }}">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed fw-semibold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ $index }}" aria-expanded="false">
+                <span class="badge bg-danger me-3 d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:1rem;">
+                  <i class="bi bi-question"></i>
+                </span>
+                {{ $faq['question'] }}
+              </button>
+            </h2>
+            <div id="faq{{ $index }}" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body text-muted lh-lg">
+                {!! nl2br(e($faq['answer'])) !!}
+              </div>
+            </div>
+          </div>
+          @endforeach
+        </div>
+
+        <!-- Still Have Questions Card -->
+        <div class="card mt-5 border-0 shadow-sm" style="background:linear-gradient(135deg, #fff3e6 0%, #ffe0c2 100%);">
+          <div class="card-body p-5 text-center">
+            <div class="mb-4">
+              <i class="bi bi-chat-left-text" style="font-size:3rem;color:#ff7a00;"></i>
+            </div>
+            <h5 class="card-title fw-bold text-dark mb-2">Bạn vẫn có câu hỏi?</h5>
+            <p class="card-text text-muted mb-4">
+              Không tìm thấy câu trả lời bạn cần? Hãy liên hệ với chúng tôi ngay.
+            </p>
+            <a href="{{ route('support.contact') }}" class="btn btn-brand btn-lg">
+              <i class="bi bi-send me-2"></i>Gửi tin nhắn
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <style>
-    .filter-btn.active {
-        @apply bg-pink-600 text-white;
-    }
-
-    .faq-item.hidden {
-        display: none;
-    }
-
-    details > summary::-webkit-details-marker {
-        display: none;
-    }
-
-    details summary i {
-        transition: transform 0.3s ease;
-    }
-
-    details[open] summary i {
-        transform: rotate(45deg);
-    }
+  .accordion-button:not(.collapsed) {
+    background-color: #fff3e6;
+    color: #ff7a00;
+    box-shadow: none;
+  }
+  .accordion-button:focus {
+    border-color: #ff7a00;
+    box-shadow: 0 0 0 0.25rem rgba(255, 122, 0, 0.25);
+  }
+  .badge-danger {
+    background-color: #ff7a00 !important;
+  }
+  .btn-outline-secondary {
+    color: #6c757d;
+    border-color: #dee2e6;
+  }
+  .btn-outline-secondary:hover {
+    background-color: #ff7a00;
+    border-color: #ff7a00;
+    color: #fff;
+  }
+  .btn-outline-secondary.active {
+    background-color: #ff7a00;
+    border-color: #ff7a00;
+    color: #fff;
+  }
+  .faq-item.d-none {
+    display: none !important;
+  }
 </style>
 
 <script>
-    function filterFAQ(category) {
-        const items = document.querySelectorAll('.faq-item');
-        const buttons = document.querySelectorAll('.filter-btn');
+  document.addEventListener('DOMContentLoaded', function() {
+    const categoryButtons = document.querySelectorAll('.category-btn');
+    const faqItems = document.querySelectorAll('.faq-item');
+
+    categoryButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const selectedCategory = this.getAttribute('data-category');
 
         // Update active button
-        buttons.forEach(btn => {
-            btn.classList.remove('active');
-            if (btn.dataset.filter === category) {
-                btn.classList.add('active');
-            }
-        });
+        categoryButtons.forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
 
-        // Filter items
-        items.forEach(item => {
-            if (category === 'all' || item.dataset.category === category) {
-                item.classList.remove('hidden');
-            } else {
-                item.classList.add('hidden');
-            }
+        // Filter FAQ items
+        faqItems.forEach(item => {
+          const itemCategory = item.getAttribute('data-category');
+          
+          if (selectedCategory === 'all' || itemCategory === selectedCategory) {
+            item.classList.remove('d-none');
+          } else {
+            item.classList.add('d-none');
+          }
         });
-    }
+      });
+    });
+  });
 </script>
+
 @endsection
