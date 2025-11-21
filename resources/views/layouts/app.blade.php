@@ -160,10 +160,14 @@
       <div class="col-md-3">
         <h6 class="mb-3">Chính sách</h6>
         <ul class="list-unstyled">
+          <li><a class="text-decoration-none text-light" href="{{ route('support.faq') }}">Trợ giúp & FAQ</a></li>
+          <li><a class="text-decoration-none text-light" href="{{ route('support.contact') }}">Liên hệ chúng tôi</a></li>
+          @auth
+          <li><a class="text-decoration-none text-light" href="{{ route('support.tickets') }}">Yêu cầu của tôi</a></li>
+          @endauth
           <li><a class="text-decoration-none text-light" href="#">Giao hàng & Đổi trả</a></li>
           <li><a class="text-decoration-none text-light" href="#">Bảo mật thông tin</a></li>
           <li><a class="text-decoration-none text-light" href="#">Điều khoản sử dụng</a></li>
-          <li><a class="text-decoration-none text-light" href="#">Hướng dẫn đặt hàng</a></li>
         </ul>
       </div>
 
@@ -185,7 +189,10 @@
     <hr class="border-secondary my-4">
     <div class="d-flex justify-content-between">
       <div>© {{ date('Y') }} FlowerShop — Made with ❤️</div>
-      <div><a href="#" class="text-decoration-none" style="color:#ff9a3c">Chính sách & Hỗ trợ</a></div>
+      <div>
+        <a href="{{ route('support.faq') }}" class="text-decoration-none" style="color:#ff9a3c">Trợ giúp</a> &nbsp;|&nbsp;
+        <a href="{{ route('support.contact') }}" class="text-decoration-none" style="color:#ff9a3c">Hỗ trợ</a>
+      </div>
     </div>
   </div>
 </footer>

@@ -10,9 +10,20 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\OrderHistoryController;
 use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\SupportController;
 
 // Trang chủ
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Support pages - FAQ is public, contact/tickets require auth
+Route::get('support/faq', [SupportController::class, 'faq'])->name('support.faq');
+Route::get('support/contact', [SupportController::class, 'contact'])->name('support.contact');
+
+Route::middleware('auth')->group(function () {
+    Route::post('support/contact', [SupportController::class, 'store'])->name('support.store');
+    Route::get('support/tickets', [SupportController::class, 'tickets'])->name('support.tickets');
+    Route::get('support/tickets/{ticket}', [SupportController::class, 'show'])->name('support.show');
+});
 
 // Sản phẩm: liệt kê + chi tiết
 Route::resource('products', ProductController::class)->only(['index','show']);
