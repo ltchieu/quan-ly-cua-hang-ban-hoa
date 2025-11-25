@@ -53,13 +53,7 @@
               </label>
             </div>
 
-            <div class="form-check mb-3 p-3 border rounded" style="background: white; border: 2px solid transparent; transition: all 0.3s;">
-              <input class="form-check-input payment-method" type="radio" name="payment_method" id="momo" value="momo">
-              <label class="form-check-label ms-2 flex-grow-1" for="momo">
-                <strong><i class="bi bi-wallet2 me-2" style="color: #a80030;"></i>Ví Momo</strong>
-                <p class="mb-0 text-muted small mt-1">Thanh toán an toàn qua ví điện tử Momo</p>
-              </label>
-            </div>
+
 
             <div class="form-check mb-3 p-3 border rounded" style="background: white; border: 2px solid transparent; transition: all 0.3s;">
               <input class="form-check-input payment-method" type="radio" name="payment_method" id="vnpay" value="vnpay">
@@ -85,7 +79,7 @@
 
   <!-- Order Summary Sidebar -->
   <div class="col-lg-4">
-    <div class="card shadow-sm sticky-top" style="top: 20px;">
+    <div class="card shadow-sm sticky-top" style="top: 100px;">
       <div class="card-header bg-light">
         <h5 class="mb-0">Đơn hàng của bạn</h5>
       </div>

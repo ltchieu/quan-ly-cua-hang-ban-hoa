@@ -16,155 +16,12 @@ class PaymentController extends Controller
      *
      * @param string $tempOrderId
      */
-    public function momo($tempOrderId)
-    {
-        $sessionData = session()->get($tempOrderId);
 
-        if (!$sessionData || auth()->id() !== $sessionData['user_id']) {
-            return redirect()->route('cart.index')->with('error', 'Phiên thanh toán đã hết hạn hoặc không hợp lệ.');
-        }
-
-        // Lấy cấu hình từ file config
-        $partnerCode = config('payment.momo.partner_code');
-        $accessKey = config('payment.momo.access_key'); 
-        $secretKey = config('payment.momo.secret_key');    
-
-        $orderInfo = "Thanh toan don hang qua MoMo";
-        $amount = (string)$sessionData['total'];
-        $orderId = time() . "";
-        $requestId = time() . "";
-        $requestType = "captureWallet";
-        $extraData = ""; 
-        
-        // Tạo URL (Ngrok hoặc Domain thật)
-        $appUrl = rtrim(config('app.url'), '/');
-        $redirectUrl = $appUrl . '/payment/momo/callback';
-        $ipnUrl = $appUrl . '/payment/momo/ipn';
-
-        // --- BƯỚC 1: TẠO CHỮ KÝ (SIGNATURE) ---
-        $rawSignature = "accessKey=" . $accessKey . 
-                        "&amount=" . $amount . 
-                        "&extraData=" . $extraData . 
-                        "&ipnUrl=" . $ipnUrl . 
-                        "&orderId=" . $orderId . 
-                        "&orderInfo=" . $orderInfo . 
-                        "&partnerCode=" . $partnerCode . 
-                        "&redirectUrl=" . $redirectUrl . 
-                        "&requestId=" . $requestId . 
-                        "&requestType=" . $requestType;
-
-        $signature = hash_hmac('sha256', $rawSignature, $secretKey);
-
-        // --- BƯỚC 2: CHUẨN BỊ DỮ LIỆU GỬI ĐI ---
-        $data = [
-            'partnerCode' => $partnerCode,
-            'partnerName' => "Test Store",
-            'storeId'     => "MomoTestStore",
-            'requestId'   => $requestId,
-            'amount'      => $amount,
-            'orderId'     => $orderId,
-            'orderInfo'   => $orderInfo,
-            'redirectUrl' => $redirectUrl,
-            'ipnUrl'      => $ipnUrl,
-            'lang'        => 'vi',
-            'extraData'   => $extraData,
-            'requestType' => $requestType,
-            'signature'   => $signature
-        ];
-
-        // Cache mapping orderId
-        cache()->put("momo_order_{$orderId}", $tempOrderId, now()->addHour());
-
-        $client = new \GuzzleHttp\Client();
-        
-        try {
-            // --- BƯỚC 3: GỬI REQUEST ĐẾN MOMO (ENDPOINT CREATE) ---
-            $response = $client->post('https://test-payment.momo.vn/v2/gateway/api/create', [
-                'json' => $data, 
-                'timeout' => 30,
-                'verify' => false
-            ]);
-
-            $result = json_decode($response->getBody(), true);
-
-            // Log kết quả để debug
-            Log::info('Momo Create Payment Response', $result);
-
-            if (isset($result['resultCode']) && $result['resultCode'] == 0) {
-                $payUrl = $result['payUrl'];
-                
-                session()->put("payment_pay_url_{$tempOrderId}", $payUrl);
-                
-                return redirect()->route('payment.momo.qr', $tempOrderId);
-            } else {
-                // Xử lý lỗi
-                $message = $result['message'] ?? 'Unknown error from MoMo';
-                Log::error('Momo Payment Error: ' . $message);
-                return redirect()->route('payment.error', ['tempOrderId' => $tempOrderId])
-                    ->with('error_message', 'Lỗi MoMo: ' . $message);
-            }
-
-        } catch (\Exception $e) {
-            Log::error('Momo Exception: ' . $e->getMessage());
-            return redirect()->route('payment.error', ['tempOrderId' => $tempOrderId])
-                ->with('error_message', 'Không thể kết nối đến cổng thanh toán.');
-        }
-    }
 
     /**
      * Momo payment callback.
      */
-    public function momoCallback(Request $request)
-    {
-        $resultCode = $request->input('resultCode');
-        $orderIdFromMomo = $request->input('orderId');
-        $tempOrderId = cache()->get("momo_order_{$orderIdFromMomo}");
 
-        if (!$tempOrderId) {
-            return redirect()->route('home')->with('error', 'Không tìm thấy đơn hàng tương ứng.');
-        }
-
-        if ($resultCode == 0) {
-            // Payment successful
-            $order = $this->_createOrderFromSession($tempOrderId);
-            if (!$order) {
-                // If order creation fails, maybe it was already created by IPN.
-                // Check the cache for the mapped order ID.
-                $orderId = cache()->get("order_id_map_{$tempOrderId}");
-                if ($orderId) {
-                    return redirect()->route('checkout.success', $orderId);
-                }
-                return redirect()->route('home')->with('error', 'Lỗi khi xử lý đơn hàng sau khi thanh toán.');
-            }
-            return redirect()->route('checkout.success', $order->id);
-        } else {
-            // Payment failed
-            $sessionData = session()->get($tempOrderId);
-            if ($sessionData && !empty($sessionData['cart'])) {
-                session()->put('cart', $sessionData['cart']); // Restore cart
-            }
-            session()->forget($tempOrderId); // Clean up session
-            return redirect()->route('payment.error', ['tempOrderId' => $tempOrderId])
-                ->with('error_message', 'Thanh toán không thành công. Giỏ hàng của bạn đã được khôi phục.');
-        }
-    }
-
-    /**
-     * Momo IPN (server-to-server notification).
-     */
-    public function momoIpn(Request $request)
-    {
-        $resultCode = $request->input('resultCode');
-        $orderIdFromMomo = $request->input('orderId');
-        $tempOrderId = cache()->get("momo_order_{$orderIdFromMomo}");
-
-        if ($tempOrderId && $resultCode == 0) {
-            // IPN is for confirmation, create order if not already created
-            $this->_createOrderFromSession($tempOrderId);
-        }
-
-        return response()->json(['message' => 'success']);
-    }
 
     /**
      * Redirect to VNPay payment gateway.
@@ -179,27 +36,35 @@ class PaymentController extends Controller
             return redirect()->route('cart.index')->with('error', 'Phiên thanh toán đã hết hạn hoặc không hợp lệ.');
         }
 
-        $vnp_TmnCode = config('payment.vnpay.tmncode');
-        $vnp_HashSecret = config('payment.vnpay.hashsecret');
-        $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        
-        // Explicitly construct URLs using APP_URL to ensure ngrok URLs are used
-        $appUrl = rtrim(config('app.url'), '/');
-        $vnp_Returnurl = $appUrl . '/payment/vnpay/callback';
+        $vnp_TmnCode = config('payment.vnpay.tmn_code');
+        $vnp_HashSecret = config('payment.vnpay.hash_secret');
+        $vnp_Url = config('payment.vnpay.url');
+        $vnp_Returnurl = config('payment.vnpay.return_url');
 
-        $vnp_TxnRef = $tempOrderId . '_' . time();
+        // If return_url is not set in env, fallback to the route
+        if (empty($vnp_Returnurl)) {
+             $appUrl = rtrim(config('app.url'), '/');
+             $vnp_Returnurl = $appUrl . '/payment/vnpay/callback';
+        }
+        
+        $vnp_TxnRef = $tempOrderId . '_' . time(); // Mã đơn hàng. Trong thực tế nên là ID đơn hàng của bạn
         $vnp_OrderInfo = "Thanh toan don hang Flower Shop";
-        $vnp_OrderType = "other";
-        $vnp_Amount = $sessionData['total'] * 100;
+        $vnp_OrderType = "billpayment";
+        $vnp_Amount = (int)($sessionData['total'] * 100);
         $vnp_Locale = 'vn';
         $vnp_IpAddr = request()->ip();
+        
+        // Fix for localhost IPv6
+        if ($vnp_IpAddr == '::1') {
+            $vnp_IpAddr = '127.0.0.1';
+        }
 
         $inputData = [
             "vnp_Version" => "2.1.0",
             "vnp_TmnCode" => $vnp_TmnCode,
             "vnp_Amount" => $vnp_Amount,
             "vnp_Command" => "pay",
-            "vnp_CreateDate" => date('YmdHis'),
+            "vnp_CreateDate" => now()->timezone('Asia/Ho_Chi_Minh')->format('YmdHis'),
             "vnp_CurrCode" => "VND",
             "vnp_IpAddr" => $vnp_IpAddr,
             "vnp_Locale" => $vnp_Locale,
@@ -209,23 +74,38 @@ class PaymentController extends Controller
             "vnp_TxnRef" => $vnp_TxnRef,
         ];
 
+        // ĐỂ HIỂN THỊ MÃ QR NGAY LẬP TỨC:
+        // Bạn đặt vnp_BankCode là VNPAYQR
+        // if (true) { 
+        //     $inputData['vnp_BankCode'] = 'VNPAYQR';
+        // }
+
         ksort($inputData);
-        $hashdata = "";
         $query = "";
+        $i = 0;
+        $hashdata = "";
         foreach ($inputData as $key => $value) {
-            $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
+            if ($i == 1) {
+                $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
+            } else {
+                $hashdata .= urlencode($key) . "=" . urlencode($value);
+                $i = 1;
+            }
             $query .= urlencode($key) . "=" . urlencode($value) . '&';
         }
-        $hashdata = ltrim($hashdata, '&');
         
         $vnp_Url = $vnp_Url . "?" . $query;
-        $secureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
-        $vnp_Url .= 'vnp_SecureHash=' . $secureHash;
+        if (isset($vnp_HashSecret)) {
+            $vnpSecureHash =   hash_hmac('sha512', $hashdata, $vnp_HashSecret);
+            $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
+        }
+
+        Log::info('VNPAY Payment URL: ' . $vnp_Url);
 
         cache()->put("vnpay_order_{$vnp_TxnRef}", $tempOrderId, now()->addHour());
-        session()->put("payment_pay_url_{$tempOrderId}", $vnp_Url);
-
-        return redirect()->route('payment.vnpay.qr', $tempOrderId);
+        
+        // Chuyển hướng khách hàng tới VNPAY
+        return redirect($vnp_Url);
     }
 
     /**
@@ -268,26 +148,7 @@ class PaymentController extends Controller
     /**
      * Display Momo QR code for payment.
      */
-    public function momoQr($tempOrderId)
-    {
-        $sessionData = session()->get($tempOrderId);
-        if (!$sessionData) {
-            return redirect()->route('cart.index')->with('error', 'Phiên thanh toán đã hết hạn.');
-        }
 
-        $payUrl = session()->get("payment_pay_url_{$tempOrderId}");
-        if (!$payUrl) {
-            return redirect()->route('payment.error', ['tempOrderId' => $tempOrderId])
-                ->with('error_message', 'URL thanh toán đã hết hạn. Vui lòng thử lại.');
-        }
-        $qrCodeUrl = 'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=' . urlencode($payUrl);
-        return view('payment.momo-qr', [
-            'qrCodeUrl' => $qrCodeUrl,
-            'payUrl' => $payUrl,
-            'tempOrderId' => $tempOrderId,
-            'total' => $sessionData['total']
-        ]);
-    }
 
     /**
      * Display VNPay QR code for payment.

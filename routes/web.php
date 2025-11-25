@@ -46,12 +46,12 @@ Route::middleware('auth')->group(function () {
     Route::post('products/{product}/reviews', [ReviewController::class,'store'])->name('reviews.store');
     
     // Payment Initiation & Status
-    Route::get('payment/momo/{tempOrderId}', [PaymentController::class, 'momo'])->name('payment.momo');
+
     Route::get('payment/vnpay/{tempOrderId}', [PaymentController::class, 'vnpay'])->name('payment.vnpay');
     Route::get('payment/status/{tempOrderId}', [PaymentController::class, 'paymentStatus'])->name('payment.status');
 
     // Payment Display (QR Code pages)
-    Route::get('payment/momo/qr/{tempOrderId}', [PaymentController::class, 'momoQr'])->name('payment.momo.qr');
+
     Route::get('payment/vnpay/qr/{tempOrderId}', [PaymentController::class, 'vnpayQr'])->name('payment.vnpay.qr');
 
     // Payment Result
@@ -61,8 +61,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Payment Callbacks (from gateways - do not require auth middleware but are part of payment flow)
-Route::get('payment/momo/callback', [PaymentController::class, 'momoCallback'])->name('payment.momo.callback');
-Route::post('payment/momo/ipn', [PaymentController::class, 'momoIpn'])->name('payment.momo.ipn');
+
 Route::get('payment/vnpay/callback', [PaymentController::class, 'vnpayCallback'])->name('payment.vnpay.callback');
 
 
