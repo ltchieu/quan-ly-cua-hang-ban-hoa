@@ -31,7 +31,7 @@ class AuthenticatedSessionController extends Controller
         $target = route('home', absolute: false);
 
         if (Auth::check() && Auth::user()->is_admin) {
-            $target = url('/admin/products');
+            $target = url('/admin/orders');
         }
 
         return redirect()->intended($target);
