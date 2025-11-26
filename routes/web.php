@@ -16,6 +16,7 @@ use App\Http\Controllers\SupportController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Support pages - FAQ is public, contact/tickets require auth
+Route::get('support', [SupportController::class, 'index'])->name('support.index');
 Route::get('support/faq', [SupportController::class, 'faq'])->name('support.faq');
 Route::get('support/contact', [SupportController::class, 'contact'])->name('support.contact');
 
