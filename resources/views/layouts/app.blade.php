@@ -80,6 +80,7 @@
       @endphp
       <ul class="navbar-nav ms-lg-3 nav-actions align-items-center flex-row">
         <li class="nav-item"><a class="nav-link" href="{{ route('products.index') }}"><i class="bi bi-flower1"></i> Sản phẩm</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ route('support.index') }}"><i class="bi bi-headset"></i> Hỗ trợ</a></li>
         <li class="nav-item">
           <a class="nav-link" href="{{ route('cart.index') }}">
             <span class="cart-icon">
@@ -160,14 +161,14 @@
       <div class="col-md-3">
         <h6 class="mb-3">Chính sách</h6>
         <ul class="list-unstyled">
-          <li><a class="text-decoration-none text-light" href="{{ route('support.faq') }}">Trợ giúp & FAQ</a></li>
+          <li><a class="text-decoration-none text-light" href="{{ route('support.index') }}">Trung tâm hỗ trợ</a></li>
+          <li><a class="text-decoration-none text-light" href="{{ route('support.faq') }}">Câu hỏi thường gặp</a></li>
           <li><a class="text-decoration-none text-light" href="{{ route('support.contact') }}">Liên hệ chúng tôi</a></li>
           @auth
           <li><a class="text-decoration-none text-light" href="{{ route('support.tickets') }}">Yêu cầu của tôi</a></li>
           @endauth
           <li><a class="text-decoration-none text-light" href="#">Giao hàng & Đổi trả</a></li>
           <li><a class="text-decoration-none text-light" href="#">Bảo mật thông tin</a></li>
-          <li><a class="text-decoration-none text-light" href="#">Điều khoản sử dụng</a></li>
         </ul>
       </div>
 
@@ -190,8 +191,8 @@
     <div class="d-flex justify-content-between">
       <div>© {{ date('Y') }} FlowerShop — Made with ❤️</div>
       <div>
-        <a href="{{ route('support.faq') }}" class="text-decoration-none" style="color:#ff9a3c">Trợ giúp</a> &nbsp;|&nbsp;
-        <a href="{{ route('support.contact') }}" class="text-decoration-none" style="color:#ff9a3c">Hỗ trợ</a>
+        <a href="{{ route('support.index') }}" class="text-decoration-none" style="color:#ff9a3c">Trung tâm hỗ trợ</a> &nbsp;|&nbsp;
+        <a href="{{ route('support.contact') }}" class="text-decoration-none" style="color:#ff9a3c">Liên hệ</a>
       </div>
     </div>
   </div>

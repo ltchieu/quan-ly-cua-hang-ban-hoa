@@ -8,6 +8,14 @@ use App\Models\SupportTicket;
 class SupportController extends Controller
 {
     /**
+     * Show support hub/index page
+     */
+    public function index()
+    {
+        return view('support.index');
+    }
+
+    /**
      * Show FAQ page
      */
     public function faq()
