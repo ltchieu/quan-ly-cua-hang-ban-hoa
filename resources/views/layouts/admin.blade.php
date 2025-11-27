@@ -19,6 +19,7 @@
       width: 250px;
       padding: 0;
       z-index: 1000;
+      transition: transform 0.3s ease;
     }
     .sidebar .brand {
       padding: 1.5rem 1rem;
@@ -52,6 +53,7 @@
     .main-content {
       margin-left: 250px;
       padding: 0;
+      transition: margin-left 0.3s ease;
     }
     .topbar {
       background: #fff;
@@ -60,6 +62,15 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+    .topbar .sidebar-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #333;
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
     }
     .content-wrapper {
       padding: 2rem;
@@ -84,14 +95,57 @@
       background: #e66a00;
       border-color: #e66a00;
     }
+    .btn-brand {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff;
+    }
+    .btn-brand:hover {
+      background: #e66a00;
+      border-color: #e66a00;
+      color: #fff;
+    }
     .stats-card {
       border-left: 4px solid var(--brand);
+    }
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      .sidebar-overlay.active {
+        display: block;
+      }
+      .main-content {
+        margin-left: 0;
+      }
+      .topbar .sidebar-toggle {
+        display: block;
+      }
+      .content-wrapper {
+        padding: 1rem;
+      }
     }
   </style>
   @yield('styles')
 </head>
 <body>
-  <div class="sidebar">
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="sidebar" id="sidebar">
     <div class="brand">
       <i class="bi bi-flower1"></i> Admin Panel
     </div>
@@ -110,6 +164,12 @@
       </a>
       <a href="{{ route('admin.staff.index') }}" class="nav-link {{ request()->routeIs('admin.staff.*') ? 'active' : '' }}">
         <i class="bi bi-person-badge"></i> Staff
+      </a>
+      <a href="{{ route('admin.discounts.index') }}" class="nav-link {{ request()->routeIs('admin.discounts.*') ? 'active' : '' }}">
+        <i class="bi bi-tag"></i> Discounts
+      </a>
+      <a href="{{ route('admin.support.index') }}" class="nav-link {{ request()->routeIs('admin.support.*') ? 'active' : '' }}">
+        <i class="bi bi-headset"></i> Support
       </a>
       <a href="{{ route('admin.banners.index') }}" class="nav-link {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">
         <i class="bi bi-image"></i> Banners
@@ -135,7 +195,12 @@
 
   <div class="main-content">
     <div class="topbar">
-      <h4 class="mb-0">@yield('page-title', 'Dashboard')</h4>
+      <div class="d-flex align-items-center">
+        <button class="sidebar-toggle" id="sidebarToggle">
+          <i class="bi bi-list"></i>
+        </button>
+        <h4 class="mb-0">@yield('page-title', 'Dashboard')</h4>
+      </div>
       <div>
         <span class="text-muted">{{ auth()->user()->name }}</span>
       </div>
@@ -172,6 +237,35 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Sidebar toggle for mobile
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('active');
+        sidebarOverlay.classList.toggle('active');
+      });
+      
+      sidebarOverlay.addEventListener('click', function() {
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+      });
+      
+      // Close sidebar when clicking on a link (mobile only)
+      const sidebarLinks = sidebar.querySelectorAll('.nav-link');
+      sidebarLinks.forEach(link => {
+        link.addEventListener('click', function() {
+          if (window.innerWidth <= 768) {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+          }
+        });
+      });
+    }
+  </script>
   @yield('scripts')
 </body>
 </html>

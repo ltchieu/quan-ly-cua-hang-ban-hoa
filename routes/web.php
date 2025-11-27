@@ -108,6 +108,21 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','admin'])->group(func
     // Reports
     Route::get('reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])
         ->name('reports.index');
+    
+    // Discounts/Vouchers
+    Route::resource('discounts', \App\Http\Controllers\Admin\DiscountController::class);
+    
+    // Support Tickets
+    Route::get('support', [\App\Http\Controllers\Admin\AdminSupportController::class, 'index'])
+        ->name('support.index');
+    Route::get('support/{ticket}', [\App\Http\Controllers\Admin\AdminSupportController::class, 'show'])
+        ->name('support.show');
+    Route::post('support/{ticket}/respond', [\App\Http\Controllers\Admin\AdminSupportController::class, 'respond'])
+        ->name('support.respond');
+    Route::patch('support/{ticket}/status', [\App\Http\Controllers\Admin\AdminSupportController::class, 'updateStatus'])
+        ->name('support.updateStatus');
+    Route::delete('support/{ticket}', [\App\Http\Controllers\Admin\AdminSupportController::class, 'destroy'])
+        ->name('support.destroy');
 });
 
 // Route đăng nhập/đăng ký của Breeze
