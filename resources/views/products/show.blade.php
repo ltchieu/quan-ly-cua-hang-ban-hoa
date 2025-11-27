@@ -29,11 +29,19 @@
     </div>
     <p class="mt-3">{{ $product->description }}</p>
 
-    <form action="{{ route('cart.add',$product) }}" method="post" class="d-flex gap-2">
-      @csrf
-      <input type="number" name="qty" value="1" min="1" class="form-control" style="width:120px">
-      <button class="btn btn-brand">Thêm giỏ hàng</button>
-    </form>
+    <div class="d-flex gap-2">
+      <form action="{{ route('cart.add',$product) }}" method="post" class="d-flex gap-2">
+        @csrf
+        <input type="number" name="qty" value="1" min="1" class="form-control" style="width:120px" id="qtyInput">
+        <button class="btn btn-brand">Thêm giỏ hàng</button>
+      </form>
+      
+      <form action="{{ route('cart.buyNow',$product) }}" method="post" class="d-flex gap-2" onsubmit="document.getElementById('buyNowQty').value = document.getElementById('qtyInput').value">
+        @csrf
+        <input type="hidden" name="qty" value="1" id="buyNowQty">
+        <button class="btn btn-danger">Mua ngay</button>
+      </form>
+    </div>
   </div>
 </div>
 

@@ -41,13 +41,21 @@ class PaymentController extends Controller
         $vnp_Url = config('payment.vnpay.url');
         $vnp_Returnurl = config('payment.vnpay.return_url');
 
-        // If return_url is not set in env, fallback to the route
+        // Robustly handle return URL
         if (empty($vnp_Returnurl)) {
              $appUrl = rtrim(config('app.url'), '/');
              $vnp_Returnurl = $appUrl . '/payment/vnpay/callback';
+        } else {
+            // Check if the return URL is just a domain (e.g. http://127.0.0.1:8000) without the path
+            $parsedUrl = parse_url($vnp_Returnurl);
+            if (!isset($parsedUrl['path']) || $parsedUrl['path'] === '/' || $parsedUrl['path'] === '') {
+                $vnp_Returnurl = rtrim($vnp_Returnurl, '/') . '/payment/vnpay/callback';
+            }
         }
         
-        $vnp_TxnRef = $tempOrderId . '_' . time(); // Mã đơn hàng. Trong thực tế nên là ID đơn hàng của bạn
+        Log::info('VNPAY Return URL: ' . $vnp_Returnurl);
+
+        $vnp_TxnRef = $tempOrderId . '_' . time();
         $vnp_OrderInfo = "Thanh toan don hang Flower Shop";
         $vnp_OrderType = "billpayment";
         $vnp_Amount = (int)($sessionData['total'] * 100);
@@ -75,7 +83,6 @@ class PaymentController extends Controller
         ];
 
         // ĐỂ HIỂN THỊ MÃ QR NGAY LẬP TỨC:
-        // Bạn đặt vnp_BankCode là VNPAYQR
         // if (true) { 
         //     $inputData['vnp_BankCode'] = 'VNPAYQR';
         // }
@@ -128,20 +135,23 @@ class PaymentController extends Controller
             if (!$order) {
                 $orderId = cache()->get("order_id_map_{$tempOrderId}");
                 if ($orderId) {
-                    return redirect()->route('checkout.success', $orderId);
+                    return redirect()->route('checkout.success', $orderId)->with('success', 'Thanh toán thành công!');
                 }
                 return redirect()->route('home')->with('error', 'Lỗi khi xử lý đơn hàng sau khi thanh toán.');
             }
-            return redirect()->route('checkout.success', $order->id);
+            return redirect()->route('checkout.success', $order->id)->with('success', 'Thanh toán thành công!');
         } else {
             // Payment failed
             $sessionData = session()->get($tempOrderId);
             if ($sessionData && !empty($sessionData['cart'])) {
-                session()->put('cart', $sessionData['cart']); // Restore cart
+                // Only restore to main cart if it wasn't a direct checkout
+                if (empty($sessionData['is_direct_checkout'])) {
+                    session()->put('cart', $sessionData['cart']); // Restore cart
+                }
             }
             session()->forget($tempOrderId); // Clean up session
             return redirect()->route('payment.error', ['tempOrderId' => $tempOrderId])
-                ->with('error_message', 'Thanh toán không thành công. Giỏ hàng của bạn đã được khôi phục.');
+                ->with('error_message', 'Thanh toán không thành công.');
         }
     }
 
@@ -199,14 +209,17 @@ class PaymentController extends Controller
         $sessionData = session()->get($tempOrderId);
 
         if ($sessionData && !empty($sessionData['cart'])) {
-            session()->put('cart', $sessionData['cart']); // Restore cart
+            // Only restore to main cart if it wasn't a direct checkout
+            if (empty($sessionData['is_direct_checkout'])) {
+                session()->put('cart', $sessionData['cart']); // Restore cart
+            }
         }
 
         // Clean up all temporary data
         session()->forget($tempOrderId);
         session()->forget("payment_pay_url_{$tempOrderId}");
 
-        return redirect()->route('cart.index')->with('success', 'Thanh toán đã bị hủy. Giỏ hàng của bạn đã được khôi phục. Bạn có thể chọn phương thức thanh toán khác hoặc tiếp tục mua sắm.');
+        return redirect()->route('cart.index')->with('success', 'Thanh toán đã bị hủy.');
     }
 
     /**
@@ -229,7 +242,10 @@ class PaymentController extends Controller
         // Restore cart if possible
         $sessionData = session()->get($tempOrderId);
         if ($sessionData && !empty($sessionData['cart']) && !session()->has('cart')) {
-            session()->put('cart', $sessionData['cart']);
+             // Only restore to main cart if it wasn't a direct checkout
+             if (empty($sessionData['is_direct_checkout'])) {
+                session()->put('cart', $sessionData['cart']);
+             }
         }
         session()->forget($tempOrderId);
         return view('payment.error');
@@ -287,7 +303,14 @@ class PaymentController extends Controller
                 // Map temp ID to real order ID and clean up session
                 cache()->put("order_id_map_{$tempOrderId}", $order->id, now()->addMinutes(10));
                 session()->forget($tempOrderId);
-                session()->forget('cart');
+                
+                // Only clear the relevant session
+                if (isset($sessionData['is_direct_checkout']) && $sessionData['is_direct_checkout']) {
+                    session()->forget('direct_checkout_item');
+                } else {
+                    session()->forget('cart');
+                }
+                
                 cache()->forget("payment_pay_url_{$tempOrderId}");
 
                 return $order;

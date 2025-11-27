@@ -12,7 +12,9 @@ class CheckoutController extends Controller
 {
     public function index()
     {
-        $cart = session('cart',[]);
+        // Check for direct checkout item first
+        $cart = session('direct_checkout_item') ?? session('cart',[]);
+        
         abort_if(empty($cart), 302, '', ['Location'=>route('cart.index')]);
         $total = collect($cart)->sum(fn($i)=>$i['price']*$i['qty']);
         return view('checkout.index', compact('cart','total'));
@@ -28,7 +30,10 @@ class CheckoutController extends Controller
             'payment_method'=>'required|in:cod,momo,vnpay'
         ]);
 
-        $cart = session('cart',[]);
+        // Check for direct checkout item first
+        $isDirectCheckout = session()->has('direct_checkout_item');
+        $cart = session('direct_checkout_item') ?? session('cart',[]);
+        
         if(empty($cart)) return redirect()->route('cart.index');
 
         $total = collect($cart)->sum(fn($i)=>$i['price']*$i['qty']);
@@ -60,7 +65,13 @@ class CheckoutController extends Controller
                 return $order;
             });
 
-            session()->forget('cart');
+            // Only clear the relevant session
+            if ($isDirectCheckout) {
+                session()->forget('direct_checkout_item');
+            } else {
+                session()->forget('cart');
+            }
+            
             return redirect()->route('checkout.success', $order->id)
                 ->with('success', 'Đặt hàng thành công! Vui lòng chờ xác nhận từ cửa hàng.');
         }
@@ -72,6 +83,7 @@ class CheckoutController extends Controller
             'cart' => $cart,
             'total' => $total,
             'user_id' => auth()->id(),
+            'is_direct_checkout' => $isDirectCheckout // Pass this flag to PaymentController
         ]);
 
         if ($data['payment_method'] === 'momo') {

@@ -13,6 +13,9 @@ class CartController extends Controller
 
     public function index()
     {
+        // Clear direct checkout item if user visits cart
+        session()->forget('direct_checkout_item');
+        
         $cart = $this->cart();
         $total = collect($cart)->sum(fn($i)=> ($i['price']*$i['qty']));
         $appliedVoucher = session()->get('applied_voucher');
@@ -33,6 +36,9 @@ class CartController extends Controller
 
     public function add(Request $request, Product $product)
     {
+        // Clear direct checkout item if user adds to main cart
+        session()->forget('direct_checkout_item');
+
         $qty = max(1, (int)$request->input('qty', 1));
         $price = $product->sale_price ?? $product->price;
 
@@ -49,6 +55,26 @@ class CartController extends Controller
         }
         $this->save($cart);
         return back()->with('success','Đã thêm vào giỏ hàng');
+    }
+
+    public function buyNow(Request $request, Product $product)
+    {
+        $qty = max(1, (int)$request->input('qty', 1));
+        $price = $product->sale_price ?? $product->price;
+
+        // Store in a separate session key for direct checkout
+        $directItem = [
+            $product->id => [
+                'name'=>$product->name,
+                'price'=>$price,
+                'qty'=>$qty,
+                'image'=>$product->image
+            ]
+        ];
+        
+        session(['direct_checkout_item' => $directItem]);
+        
+        return redirect()->route('checkout.index');
     }
 
     public function update(Request $request, Product $product)

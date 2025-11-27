@@ -31,6 +31,7 @@ Route::resource('products', ProductController::class)->only(['index','show']);
 // Giỏ hàng (session)
 Route::get('cart', [CartController::class,'index'])->name('cart.index');
 Route::post('cart/{product}', [CartController::class,'add'])->name('cart.add');
+Route::post('cart/buy-now/{product}', [CartController::class, 'buyNow'])->name('cart.buyNow');
 Route::patch('cart/{product}', [CartController::class,'update'])->name('cart.update');
 Route::delete('cart/{product}', [CartController::class,'remove'])->name('cart.remove');
 Route::post('cart/voucher/apply', [CartController::class, 'applyVoucher'])->name('cart.applyVoucher');
@@ -47,6 +48,9 @@ Route::middleware('auth')->group(function () {
     
     // Payment Initiation & Status
 
+    // Payment Callbacks
+    Route::get('payment/vnpay/callback', [PaymentController::class, 'vnpayCallback'])->name('payment.vnpay.callback');
+
     Route::get('payment/vnpay/{tempOrderId}', [PaymentController::class, 'vnpay'])->name('payment.vnpay');
     Route::get('payment/status/{tempOrderId}', [PaymentController::class, 'paymentStatus'])->name('payment.status');
 
@@ -59,11 +63,6 @@ Route::middleware('auth')->group(function () {
     Route::get('payment/error/{tempOrderId}', [PaymentController::class, 'error'])->name('payment.error');
     Route::get('payment/cancel/{tempOrderId}', [PaymentController::class, 'cancelPayment'])->name('payment.cancel');
 });
-
-// Payment Callbacks (from gateways - do not require auth middleware but are part of payment flow)
-
-Route::get('payment/vnpay/callback', [PaymentController::class, 'vnpayCallback'])->name('payment.vnpay.callback');
-
 
 // Client account routes (require auth)
 Route::middleware('auth')->group(function () {
