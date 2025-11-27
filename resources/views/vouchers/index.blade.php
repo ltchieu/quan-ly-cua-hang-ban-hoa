@@ -26,20 +26,33 @@
                     <h5 class="card-title text-brand" style="color: #ff7a00;">
                       <i class="bi bi-ticket"></i> {{ $voucher->code }}
                     </h5>
-                    <span class="badge bg-success">{{ $voucher->discount_percentage }}%</span>
+                    <span class="badge bg-success">
+                      @if($voucher->type === 'percent')
+                        {{ $voucher->value }}%
+                      @else
+                        {{ number_format($voucher->value, 0, '.', ',') }} ₫
+                      @endif
+                    </span>
                   </div>
 
                   <p class="card-text text-muted">{{ $voucher->description }}</p>
 
                   <div class="mb-3">
+                    @if($voucher->ends_at)
                     <small class="text-muted d-block">
                       <i class="bi bi-calendar"></i>
-                      Hết hạn: {{ $voucher->expiry_date->format('d/m/Y') }}
+                      Hết hạn: {{ $voucher->ends_at->format('d/m/Y') }}
                     </small>
-                    @if($voucher->min_order_amount)
+                    @else
+                    <small class="text-muted d-block">
+                      <i class="bi bi-infinity"></i> Không hết hạn
+                    </small>
+                    @endif
+                    
+                    @if($voucher->min_total)
                       <small class="text-muted d-block">
                         <i class="bi bi-currency-dollar"></i>
-                        Đơn tối thiểu: {{ number_format($voucher->min_order_amount, 0, '.', ',') }} ₫
+                        Đơn tối thiểu: {{ number_format($voucher->min_total, 0, '.', ',') }} ₫
                       </small>
                     @endif
                   </div>

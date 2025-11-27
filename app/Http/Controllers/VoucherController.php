@@ -16,8 +16,11 @@ class VoucherController extends Controller
 
         // Vouchers are typically system-wide, but we can filter by validity
         $vouchers = Voucher::where('is_active', true)
-            ->where('expiry_date', '>=', now())
-            ->orderBy('discount_percentage', 'desc')
+            ->where(function($q) {
+                $q->whereNull('ends_at')
+                  ->orWhere('ends_at', '>=', now());
+            })
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return view('vouchers.index', [

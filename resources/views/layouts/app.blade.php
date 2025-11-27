@@ -102,6 +102,7 @@
               <li><a class="dropdown-item" href="{{ route('profile.show') }}"><i class="bi bi-person me-2"></i> Hồ sơ</a></li>
               <li><a class="dropdown-item" href="{{ route('orders.index') }}"><i class="bi bi-clock-history me-2"></i> Lịch sử đơn hàng</a></li>
               <li><a class="dropdown-item" href="{{ route('vouchers.index') }}"><i class="bi bi-ticket-perforated me-2"></i> Mã giảm giá</a></li>
+              <li><a class="dropdown-item" href="{{ route('support.tickets') }}"><i class="bi bi-ticket-detailed me-2"></i> Yêu cầu hỗ trợ</a></li>
               <li><hr class="dropdown-divider"></li>
               @if(auth()->user() && auth()->user()->is_admin)
                 <li><a class="dropdown-item" href="{{ url('/admin/products') }}"><i class="bi bi-tools me-2"></i> Quản trị</a></li>

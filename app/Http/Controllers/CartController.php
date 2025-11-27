@@ -115,7 +115,10 @@ class CartController extends Controller
         $total = collect($cart)->sum(fn($i) => ($i['price'] * $i['qty']));
         $voucher = Voucher::where('code', $code)
             ->where('is_active', true)
-            ->where('expiry_date', '>=', now())
+            ->where(function($q) {
+                $q->whereNull('ends_at')
+                  ->orWhere('ends_at', '>=', now());
+            })
             ->first();
 
         if (!$voucher) {
