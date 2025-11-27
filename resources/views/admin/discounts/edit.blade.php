@@ -24,10 +24,10 @@
         </div>
 
         <div class="col-md-6 mb-3">
-          <label for="description" class="form-label">Mô tả</label>
+          <label for="description" class="form-label">Mô tả <span class="text-danger">*</span></label>
           <input type="text" class="form-control @error('description') is-invalid @enderror" 
                  id="description" name="description" value="{{ old('description', $discount->description) }}" 
-                 placeholder="Giảm giá mùa hè">
+                 placeholder="Giảm giá mùa hè" required>
           @error('description')
             <div class="invalid-feedback">{{ $message }}</div>
           @enderror
@@ -70,30 +70,30 @@
 
       <div class="row">
         <div class="col-md-4 mb-3">
-          <label for="starts_at" class="form-label">Ngày bắt đầu</label>
+          <label for="starts_at" class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
           <input type="datetime-local" class="form-control @error('starts_at') is-invalid @enderror" 
                  id="starts_at" name="starts_at" 
-                 value="{{ old('starts_at', $discount->starts_at ? $discount->starts_at->format('Y-m-d\TH:i') : '') }}">
+                 value="{{ old('starts_at', $discount->starts_at ? $discount->starts_at->format('Y-m-d\TH:i') : '') }}" required>
           @error('starts_at')
             <div class="invalid-feedback">{{ $message }}</div>
           @enderror
         </div>
 
         <div class="col-md-4 mb-3">
-          <label for="ends_at" class="form-label">Ngày kết thúc</label>
+          <label for="ends_at" class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
           <input type="datetime-local" class="form-control @error('ends_at') is-invalid @enderror" 
                  id="ends_at" name="ends_at" 
-                 value="{{ old('ends_at', $discount->ends_at ? $discount->ends_at->format('Y-m-d\TH:i') : '') }}">
+                 value="{{ old('ends_at', $discount->ends_at ? $discount->ends_at->format('Y-m-d\TH:i') : '') }}" required>
           @error('ends_at')
             <div class="invalid-feedback">{{ $message }}</div>
           @enderror
         </div>
 
         <div class="col-md-4 mb-3">
-          <label for="usage_limit" class="form-label">Giới hạn sử dụng</label>
+          <label for="usage_limit" class="form-label">Giới hạn sử dụng <span class="text-danger">*</span></label>
           <input type="number" class="form-control @error('usage_limit') is-invalid @enderror" 
                  id="usage_limit" name="usage_limit" value="{{ old('usage_limit', $discount->usage_limit) }}" 
-                 min="1" placeholder="Không giới hạn">
+                 min="1" placeholder="Không giới hạn" required>
           @error('usage_limit')
             <div class="invalid-feedback">{{ $message }}</div>
           @enderror
@@ -118,4 +118,25 @@
     </form>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const startsAt = document.getElementById('starts_at');
+    const endsAt = document.getElementById('ends_at');
+
+    // For edit page, we might not want to restrict min date if it's already in the past
+    // But we can still enforce start < end
+    
+    startsAt.addEventListener('change', function() {
+      endsAt.min = this.value;
+    });
+    
+    endsAt.addEventListener('change', function() {
+        if(startsAt.value && this.value < startsAt.value){
+            alert('Ngày kết thúc phải sau ngày bắt đầu');
+            this.value = '';
+        }
+    });
+  });
+</script>
 @endsection

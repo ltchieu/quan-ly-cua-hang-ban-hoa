@@ -49,13 +49,13 @@ class DiscountController extends Controller
     {
         $validated = $request->validate([
             'code' => 'required|string|max:255|unique:vouchers,code',
-            'description' => 'nullable|string|max:500',
+            'description' => 'required|string|max:500',
             'type' => 'required|in:percent,fixed',
             'value' => 'required|integer|min:0',
             'min_total' => 'required|integer|min:0',
-            'starts_at' => 'nullable|date',
-            'ends_at' => 'nullable|date|after_or_equal:starts_at',
-            'usage_limit' => 'nullable|integer|min:1',
+            'starts_at' => 'required|date|after_or_equal:today',
+            'ends_at' => 'required|date|after:starts_at',
+            'usage_limit' => 'required|integer|min:1',
             'is_active' => 'boolean',
         ]);
 
@@ -78,13 +78,13 @@ class DiscountController extends Controller
     {
         $validated = $request->validate([
             'code' => 'required|string|max:255|unique:vouchers,code,' . $discount->id,
-            'description' => 'nullable|string|max:500',
+            'description' => 'required|string|max:500',
             'type' => 'required|in:percent,fixed',
             'value' => 'required|integer|min:0',
             'min_total' => 'required|integer|min:0',
-            'starts_at' => 'nullable|date',
-            'ends_at' => 'nullable|date|after_or_equal:starts_at',
-            'usage_limit' => 'nullable|integer|min:1',
+            'starts_at' => 'required|date|after_or_equal:today',
+            'ends_at' => 'required|date|after:starts_at',
+            'usage_limit' => 'required|integer|min:1',
             'is_active' => 'boolean',
         ]);
 
