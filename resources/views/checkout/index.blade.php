@@ -86,7 +86,7 @@
       <div class="card-body" style="max-height: 400px; overflow-y: auto;">
         @foreach($cart as $pid => $item)
           <div class="d-flex gap-2 mb-3 pb-3 border-bottom">
-            <img src="{{ $item['image'] ?? 'https://via.placeholder.com/60' }}" alt="{{ $item['name'] }}" 
+            <img src="{{ $item['image'] ? asset('storage/'.$item['image']) : 'https://via.placeholder.com/60' }}" alt="{{ $item['name'] }}" 
                  style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;">
             <div class="flex-grow-1">
               <p class="mb-1 small"><strong>{{ $item['name'] }}</strong></p>
